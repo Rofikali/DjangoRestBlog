@@ -48,18 +48,13 @@ class UserRegistrationView(APIView):
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            print()
-            print()
-            print(serializer)
-            print()
-            print()
             user = serializer.save()
             token = get_tokens_for_user(user)
             return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_201_CREATED)
         else:
             return Response({'msg': serializer.errors}, status=HTTP_400_BAD_REQUEST)
 
-        # this is main one
+        ''' this is the main one here'''
         # def post(self, request, format=None):
         #     serializer = UserRegistrationSerializer(data=request.data)
         #     serializer.is_valid(raise_exception=True)
@@ -83,14 +78,30 @@ class UserLoginView(APIView):
 
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        email = serializer.data.get('email')
-        password = serializer.data.get('password')
-        user = authenticate(emial=email, password=password)
-        if user is not None:
-            # A backend authenticated the credentials
-            token = get_tokens_for_user(user)
-            return Response({'token': token, 'msg': 'Successfully logedin'}, status=HTTP_200_OK)
+        # em = serializer.initial_data
+        # ps = serializer.initial_data
+
+        if serializer.is_valid():
+            email = serializer.data.get('email')
+            password = serializer.data.get('password')
+            user = authenticate(emial=email, password=password)
+            if user is not None:
+                # A backend authenticated the credentials
+                token = get_tokens_for_user(user)
+                return Response({'token': token, 'msg': 'Successfully logedin'}, status=HTTP_200_OK)
         else:
             # No backend authenticated the credentials
-            return Response({'Your are succesfully not logedin'}, status=HTTP_400_BAD_REQUEST)
+            return Response({'msg': serializer.errors}, status=HTTP_400_BAD_REQUEST)
+
+    ''' main one is this '''
+
+    # def post(self, request, format=None):
+    #     serializer = UserLoginSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     email = serializer.data.get('email')
+    #     password = serializer.data.get('password')
+    #     user = authenticate(emial=email, password=password)
+    #     if user is not None:
+    #         # A backend authenticated the credentials
+    #         token = get_tokens_for_user(user)
+    #         return Response({'token': token, 'msg': 'Successfully logedin'}, status=HTTP_200_OK)
