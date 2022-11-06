@@ -1,4 +1,4 @@
-from telnetlib import STATUS
+# importing all from here
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -47,10 +47,33 @@ class UserRegistrationView(APIView):
 
     def post(self, request, format=None):
         serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        token = get_tokens_for_user(user)
-        return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_200_OK)
+        if serializer.is_valid():
+            print()
+            print()
+            print(serializer)
+            print()
+            print()
+            user = serializer.save()
+            token = get_tokens_for_user(user)
+            return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_201_CREATED)
+        else:
+            return Response({'msg': serializer.errors}, status=HTTP_400_BAD_REQUEST)
+
+        # this is main one
+        # def post(self, request, format=None):
+        #     serializer = UserRegistrationSerializer(data=request.data)
+        #     serializer.is_valid(raise_exception=True)
+        #     user = serializer.save()
+        #     token = get_tokens_for_user(user)
+        #     return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_200_OK)
+
+        # {
+        #   "email":"user@gmail.com",
+        #   "name":"User",
+        #   "password":"password123",
+        #   "password2":"password123",
+        #   "tc":"True"
+        # }
 
 
 class UserLoginView(APIView):
