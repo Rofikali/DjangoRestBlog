@@ -1,4 +1,3 @@
-# importing all from here
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,7 +10,10 @@ from accounts.models import User
 
 # simple jwt custom token
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import (UserRegistrationSerializer, UserLoginSerializer)
+from .serializers import (UserRegistrationSerializer,
+                          UserLoginSerializer,
+                          UserProfileSerializer
+                          )
 
 
 def get_tokens_for_user(user):
@@ -52,6 +54,13 @@ class UserRegistrationView(APIView):
             token = get_tokens_for_user(user)
             return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_201_CREATED)
         else:
+            # print()
+            # print()
+            '''
+            checking ErrorDetail keyboard inside Error fields or not
+            '''
+            # print(serializer.errors)
+            # print()
             return Response({'msg': serializer.errors}, status=HTTP_400_BAD_REQUEST)
 
         ''' this is the main one here'''
@@ -62,13 +71,6 @@ class UserRegistrationView(APIView):
         #     token = get_tokens_for_user(user)
         #     return Response({'token': token, 'msg': 'Everything is ok here.'}, status=HTTP_200_OK)
 
-        # {
-        #   "email":"user@gmail.com",
-        #   "name":"User",
-        #   "password":"password123",
-        #   "password2":"password123",
-        #   "tc":"True"
-        # }
 
 
 class UserLoginView(APIView):
@@ -78,20 +80,26 @@ class UserLoginView(APIView):
 
     def post(self, request, format=None):
         serializer = UserLoginSerializer(data=request.data)
-        # em = serializer.initial_data
-        # ps = serializer.initial_data
 
         if serializer.is_valid():
             email = serializer.data.get('email')
             password = serializer.data.get('password')
-            user = authenticate(emial=email, password=password)
+            user = authenticate(email=email, password=password)
             if user is not None:
                 # A backend authenticated the credentials
                 token = get_tokens_for_user(user)
                 return Response({'token': token, 'msg': 'Successfully logedin'}, status=HTTP_200_OK)
-        else:
-            # No backend authenticated the credentials
-            return Response({'msg': serializer.errors}, status=HTTP_400_BAD_REQUEST)
+            else:
+                return Response(
+                    {'errors':
+                     {'non_fileds_errors': [
+                         'This email or password is not Valid']}
+                     },
+                    status=HTTP_200_OK
+                )
+
+        # No backend authenticated the credentials
+        return Response({'errors': serializer.errors}, status=HTTP_400_BAD_REQUEST)
 
     ''' main one is this '''
 
@@ -105,3 +113,35 @@ class UserLoginView(APIView):
     #         # A backend authenticated the credentials
     #         token = get_tokens_for_user(user)
     #         return Response({'token': token, 'msg': 'Successfully logedin'}, status=HTTP_200_OK)
+    # else:
+    #     return Response(
+    #         {'errors':
+    #          {'non_fileds_errors': [
+    #              'This email or password is not Valid']}
+    #          },
+    #         status=HTTP_200_OK
+    #     )
+
+
+class UserProfileView(APIView):
+    # login required
+    # if request.user is same user
+
+    def get(self, request, format=None):
+        serializer = UserProfileSerializer(request.user)
+        return Response({'msg': serializer.data}, status=HTTP_200_OK)
+
+
+class UserChangePasswordView(APIView):
+    def get(self):
+        return Response({'msg': 'Successfully logedin'}, status=HTTP_200_OK)
+
+
+class SendPasswordResetEmailView(APIView):
+    def get(self):
+        return Response({'msg': 'Successfully logedin'}, status=HTTP_200_OK)
+
+
+class UserPasswordResetView(APIView):
+    def get(self):
+        return Response({'msg': 'Successfully logedin'}, status=HTTP_200_OK)

@@ -1,6 +1,6 @@
+import email
 from rest_framework import serializers
 from .models import User
-
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -33,6 +33,14 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255)
+
     class Meta:
         model = User
         fields = ['email', 'password']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
